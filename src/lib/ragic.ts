@@ -78,6 +78,7 @@ async function resolveRagicImages(markdown: string, apiKey: string): Promise<str
 /**
  * @param recordId 指定 Ragic 的資料 node id（表單網址列最後那個數字，例如
  *   .../forms8/2/0 裡的 0）只抓那一筆。省略時抓整個表單、取最新一筆。
+ *   RAGIC_SHEET_URL 必須是「不含記錄 id」的乾淨表單網址（.../{tab}/{sheetIndex}）。
  */
 export async function fetchRagicMarkdown(
   recordId?: number | string
@@ -94,13 +95,10 @@ export async function fetchRagicMarkdown(
   // ?api      → 回傳 JSON
   // &v=3      → API v3 回傳格式
   // &naming=EID → 用 Field ID 當 key（比欄位名稱穩定，改欄位名不會壞）
-  // RAGIC_SHEET_URL 尾巴若已經帶著記錄 id（例如 .../2/0），先拿掉，
-  // 這樣才能依 recordId 換成指定的那一筆
-  const baseUrl = sheetUrl.replace(/\/\d+$/, '');
   const url =
     recordId === undefined
       ? `${sheetUrl}?api&v=3&naming=EID`
-      : `${baseUrl}/${recordId}?api&v=3&naming=EID`;
+      : `${sheetUrl}/${recordId}?api&v=3&naming=EID`;
 
   const res = await fetch(url, {
     headers: {
@@ -114,22 +112,25 @@ export async function fetchRagicMarkdown(
 
   const data = await res.json();
 
-  // 指定單筆記錄時，回應本身就是攤平的物件（有 _ragicId）；
-  // 抓整個表單時，回應格式是 { "0": {record}, "1": {record}, ... }
-  const isSingleRecord = Boolean(data) && typeof data === 'object' && '_ragicId' in data;
-  const records = isSingleRecord
-    ? [data as Record<string, any>]
-    : (Object.values(data ?? {}) as Record<string, any>[]);
+  // 指定的記錄不存在時，Ragic 有時回傳明確的錯誤物件（如 Invalid Form Index），
+  // 有時（例如 recordId 超出範圍）回傳完全不相關的結構（如帳號的表單清單）。
+  // 不管抓整個表單還是抓單筆，正常回應都是 { "<key>": {record}, ... }，
+  // 用 _ragicId 篩掉不是記錄的雜訊，兩種異常情況都能一併擋下來。
+  const records = (Object.values(data ?? {}) as any[]).filter(
+    (r) => r && typeof r === 'object' && '_ragicId' in r
+  ) as Record<string, any>[];
 
   if (records.length === 0) {
     console.warn(`[ragic] 找不到資料（recordId=${recordId ?? '(latest)'}）`);
     return null;
   }
 
-  // 沒指定 recordId 時，示範取「最新一筆」— 依 _ragicId 最大者
-  const record = isSingleRecord
-    ? records[0]
-    : records.reduce((a, b) => ((b._ragicId ?? 0) > (a._ragicId ?? 0) ? b : a));
+  // 有指定 recordId 時，回應本來就只會有這一筆；
+  // 沒指定時（抓整個表單），示範取「最新一筆」— 依 _ragicId 最大者
+  const record =
+    recordId !== undefined
+      ? records[0]
+      : records.reduce((a, b) => ((b._ragicId ?? 0) > (a._ragicId ?? 0) ? b : a));
 
   const rawMarkdown = record[fieldId];
   if (typeof rawMarkdown !== 'string' || rawMarkdown.trim() === '') {
