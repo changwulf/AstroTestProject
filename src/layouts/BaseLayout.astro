@@ -41,13 +41,13 @@ const {
 
 <style is:global>
   :root {
-    --bg: #fbfaf7;
-    --ink: #23292e;
-    --ink-soft: #6b7480;
-    --line: #e3ded3;
-    --accent: #1f6f54;
-    --accent-soft: #e5f0ea;
-    --card: #ffffff;
+    --bg: #0a1110;
+    --ink: #f3f6f5;
+    --ink-soft: #a3b3b0;
+    --line: #1f2e2c;
+    --accent: #17b8a6;
+    --accent-soft: #0f2b28;
+    --card: #101b1a;
   }
 
   * { box-sizing: border-box; }
@@ -101,6 +101,7 @@ const {
 
   .hero {
     padding: 3.5rem 0 2rem;
+    background: radial-gradient(120% 160% at 20% 0%, #123a35 0%, transparent 60%);
   }
   .eyebrow {
     color: var(--accent);
@@ -141,8 +142,8 @@ const {
     font-weight: 600;
   }
   .badge[data-live='false'] {
-    background: #f3ede0;
-    color: #8a6d1f;
+    background: #362a12;
+    color: #e0b96a;
   }
   .muted { color: var(--ink-soft); }
 
@@ -164,8 +165,8 @@ const {
     border-radius: 0 8px 8px 0;
   }
   .prose pre {
-    background: #22272b;
-    color: #e8edf2;
+    background: #060b0a;
+    color: #d7e6e3;
     padding: 1rem 1.25rem;
     border-radius: 8px;
     overflow-x: auto;
@@ -173,7 +174,7 @@ const {
   }
   .prose code { font-family: ui-monospace, 'SFMono-Regular', Consolas, monospace; }
   .prose :not(pre) > code {
-    background: #f0ede4;
+    background: #1a2b29;
     padding: 0.1em 0.4em;
     border-radius: 4px;
     font-size: 0.9em;
