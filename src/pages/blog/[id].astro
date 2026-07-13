@@ -1,0 +1,43 @@
+---
+import { marked } from 'marked';
+import { fetchRagicMarkdown } from '../../lib/ragic';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+// 先產出 10 篇：Ragic node id 0 ~ 9（例如 .../forms8/2/0 ~ .../forms8/2/9）
+export function getStaticPaths() {
+  return Array.from({ length: 10 }, (_, i) => ({
+    params: { id: String(i) },
+  }));
+}
+
+const { id } = Astro.params;
+
+// ===== Build time 執行：從 Ragic 撈這一筆記錄的 Markdown 欄位 =====
+const ragic = await fetchRagicMarkdown(id);
+
+const fallbackMarkdown = `## 這是示範內容（尚未連接 Ragic）
+
+找不到第 ${id} 筆資料，請確認 Ragic 表單裡有這筆記錄，或 \`.env\` 是否設定正確。`;
+
+const source = ragic ? 'Ragic API' : '示範內容（未連接）';
+const html = marked.parse(ragic?.markdown ?? fallbackMarkdown);
+const builtAt = new Date().toLocaleString('zh-TW', { timeZone: 'Asia/Taipei' });
+---
+
+<BaseLayout title={`第 ${id} 篇文章 · 巧禾雲端工作室`}>
+  <section class="hero">
+    <p class="eyebrow">Blog</p>
+    <h1>第 {id} 篇文章</h1>
+  </section>
+
+  <section class="cms-block">
+    <div class="cms-meta">
+      <span class="badge" data-live={ragic ? 'true' : 'false'}>
+        資料來源：{source}
+      </span>
+      <span class="muted">Record ID：{id}</span>
+      <span class="muted">Build 時間：{builtAt}</span>
+    </div>
+    <article class="prose" set:html={html} />
+  </section>
+</BaseLayout>

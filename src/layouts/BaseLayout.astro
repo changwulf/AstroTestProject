@@ -1,0 +1,193 @@
+---
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const {
+  title = '巧禾雲端工作室',
+  description = '製造業數位化的翻譯者 — CRM、自動化與工作流程整合',
+} = Astro.props;
+---
+
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="wrap">
+        <span class="brand">巧禾雲端工作室</span>
+        <nav>
+          <a href="/">首頁</a>
+          <a href="/blog">Blog</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="wrap">
+      <slot />
+    </main>
+
+    <footer class="wrap site-footer">
+      <p class="muted">© 2026 巧禾雲端工作室 · Astro + Ragic + Cloudflare Pages</p>
+    </footer>
+  </body>
+</html>
+
+<style is:global>
+  :root {
+    --bg: #fbfaf7;
+    --ink: #23292e;
+    --ink-soft: #6b7480;
+    --line: #e3ded3;
+    --accent: #1f6f54;
+    --accent-soft: #e5f0ea;
+    --card: #ffffff;
+  }
+
+  * { box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+  }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', system-ui, sans-serif;
+    line-height: 1.7;
+  }
+
+  .wrap {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 0 1.25rem;
+  }
+
+  .site-header {
+    border-bottom: 1px solid var(--line);
+    background: var(--bg);
+  }
+  .site-header .wrap {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+  }
+  .brand {
+    font-weight: 700;
+    letter-spacing: 0.04em;
+  }
+  nav a {
+    color: var(--ink);
+    text-decoration: none;
+    margin-left: 1.25rem;
+    font-size: 0.95rem;
+  }
+  nav a:hover { color: var(--accent); }
+  nav a:focus-visible,
+  .prose a:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+  }
+
+  .hero {
+    padding: 3.5rem 0 2rem;
+  }
+  .eyebrow {
+    color: var(--accent);
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    margin: 0 0 0.75rem;
+  }
+  h1 {
+    font-size: clamp(1.7rem, 4.5vw, 2.4rem);
+    line-height: 1.35;
+    margin: 0 0 1rem;
+    font-weight: 700;
+  }
+  .lead {
+    color: var(--ink-soft);
+    font-size: 1.05rem;
+    margin: 0;
+    max-width: 34em;
+  }
+
+  .cms-block {
+    margin: 2.5rem 0 4rem;
+  }
+  .cms-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    align-items: center;
+    margin-bottom: 0.9rem;
+    font-size: 0.85rem;
+  }
+  .badge {
+    background: var(--accent-soft);
+    color: var(--accent);
+    border-radius: 999px;
+    padding: 0.2rem 0.75rem;
+    font-weight: 600;
+  }
+  .badge[data-live='false'] {
+    background: #f3ede0;
+    color: #8a6d1f;
+  }
+  .muted { color: var(--ink-soft); }
+
+  .prose {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 1.75rem 2rem;
+  }
+  .prose h2 { margin-top: 0; font-size: 1.35rem; }
+  .prose h3 { font-size: 1.1rem; }
+  .prose a { color: var(--accent); }
+  .prose blockquote {
+    margin: 1rem 0;
+    padding: 0.25rem 1rem;
+    border-left: 3px solid var(--accent);
+    color: var(--ink-soft);
+    background: var(--accent-soft);
+    border-radius: 0 8px 8px 0;
+  }
+  .prose pre {
+    background: #22272b;
+    color: #e8edf2;
+    padding: 1rem 1.25rem;
+    border-radius: 8px;
+    overflow-x: auto;
+    font-size: 0.9rem;
+  }
+  .prose code { font-family: ui-monospace, 'SFMono-Regular', Consolas, monospace; }
+  .prose :not(pre) > code {
+    background: #f0ede4;
+    padding: 0.1em 0.4em;
+    border-radius: 4px;
+    font-size: 0.9em;
+  }
+  .prose img { max-width: 100%; border-radius: 8px; }
+
+  .site-footer {
+    border-top: 1px solid var(--line);
+    padding-top: 1.25rem;
+    padding-bottom: 2.5rem;
+    font-size: 0.85rem;
+  }
+
+  @media (max-width: 540px) {
+    .prose { padding: 1.25rem 1.1rem; }
+  }
+</style>

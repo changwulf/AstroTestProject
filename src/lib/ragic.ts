@@ -75,7 +75,13 @@ async function resolveRagicImages(markdown: string, apiKey: string): Promise<str
   return result;
 }
 
-export async function fetchRagicMarkdown(): Promise<RagicContent | null> {
+/**
+ * @param recordId 指定 Ragic 的資料 node id（表單網址列最後那個數字，例如
+ *   .../forms8/2/0 裡的 0）只抓那一筆。省略時抓整個表單、取最新一筆。
+ */
+export async function fetchRagicMarkdown(
+  recordId?: number | string
+): Promise<RagicContent | null> {
   const sheetUrl = import.meta.env.RAGIC_SHEET_URL;
   const apiKey = import.meta.env.RAGIC_API_KEY;
   const fieldId = import.meta.env.RAGIC_FIELD_ID;
@@ -88,7 +94,13 @@ export async function fetchRagicMarkdown(): Promise<RagicContent | null> {
   // ?api      → 回傳 JSON
   // &v=3      → API v3 回傳格式
   // &naming=EID → 用 Field ID 當 key（比欄位名稱穩定，改欄位名不會壞）
-  const url = `${sheetUrl}?api&v=3&naming=EID`;
+  // RAGIC_SHEET_URL 尾巴若已經帶著記錄 id（例如 .../2/0），先拿掉，
+  // 這樣才能依 recordId 換成指定的那一筆
+  const baseUrl = sheetUrl.replace(/\/\d+$/, '');
+  const url =
+    recordId === undefined
+      ? `${sheetUrl}?api&v=3&naming=EID`
+      : `${baseUrl}/${recordId}?api&v=3&naming=EID`;
 
   const res = await fetch(url, {
     headers: {
@@ -102,19 +114,24 @@ export async function fetchRagicMarkdown(): Promise<RagicContent | null> {
 
   const data = await res.json();
 
-  // Ragic 回傳格式：{ "0": {record}, "1": {record}, ... }（key 是流水序）
-  // 這裡示範取「最新一筆」— 依 _ragicId 最大者
-  const records = Object.values(data) as Record<string, any>[];
+  // 指定單筆記錄時，回應本身就是攤平的物件（有 _ragicId）；
+  // 抓整個表單時，回應格式是 { "0": {record}, "1": {record}, ... }
+  const isSingleRecord = Boolean(data) && typeof data === 'object' && '_ragicId' in data;
+  const records = isSingleRecord
+    ? [data as Record<string, any>]
+    : (Object.values(data ?? {}) as Record<string, any>[]);
+
   if (records.length === 0) {
-    console.warn('[ragic] 表單裡沒有任何資料');
+    console.warn(`[ragic] 找不到資料（recordId=${recordId ?? '(latest)'}）`);
     return null;
   }
 
-  const latest = records.reduce((a, b) =>
-    (b._ragicId ?? 0) > (a._ragicId ?? 0) ? b : a
-  );
+  // 沒指定 recordId 時，示範取「最新一筆」— 依 _ragicId 最大者
+  const record = isSingleRecord
+    ? records[0]
+    : records.reduce((a, b) => ((b._ragicId ?? 0) > (a._ragicId ?? 0) ? b : a));
 
-  const rawMarkdown = latest[fieldId];
+  const rawMarkdown = record[fieldId];
   if (typeof rawMarkdown !== 'string' || rawMarkdown.trim() === '') {
     console.warn(`[ragic] 欄位 ${fieldId} 是空的或不存在，請確認 Field ID`);
     return null;

@@ -1,0 +1,45 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const POST_COUNT = 10;
+const posts = Array.from({ length: POST_COUNT }, (_, i) => i);
+---
+
+<BaseLayout title="Blog · 巧禾雲端工作室">
+  <section class="hero">
+    <p class="eyebrow">Blog</p>
+    <h1>文章列表</h1>
+  </section>
+
+  <section class="cms-block">
+    <ul class="post-list">
+      {posts.map((id) => (
+        <li><a href={`/blog/${id}`}>第 {id} 篇文章</a></li>
+      ))}
+    </ul>
+  </section>
+</BaseLayout>
+
+<style>
+  .post-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 0.75rem;
+  }
+  .post-list a {
+    display: block;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 1rem 1.25rem;
+    color: var(--ink);
+    text-decoration: none;
+    font-weight: 600;
+  }
+  .post-list a:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+</style>
